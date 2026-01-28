@@ -10,7 +10,9 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-
+app.use('/api/workers', require('./routers/workerRouters'));
+app.use('/api/otp',require('./routers/otpRouter'))
+app.use('/api/leads', require('./routers/leadRoutes'));
 // Test Route
 app.get("/", (req, res) => {
   res.send("API is working fine 🚀");
