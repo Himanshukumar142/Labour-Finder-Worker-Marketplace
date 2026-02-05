@@ -1,51 +1,67 @@
 const Worker = require('../models/Worker');
-const Otp = require('../models/OtpModel');
+const WorkerOtp = require('../models/WorkerOtp');
 
-// @desc    Add a new worker (With OTP & Location)
-// @route   POST /api/workers
-// @access  Private (Needs Token)
 exports.addWorker = async (req, res) => {
-    try {
-        const { name, phone, category, dailyWage, address, latitude, longitude, otp } = req.body;
+  try {
+    const {
+      name,
+      phone,
+      category,
+      dailyWage,
+      address,
+      latitude,
+      longitude
+    } = req.body;
 
-        // 1. Check OTP Verification
-        const validOtp = await Otp.findOne({ phone, otp });
-        if (!validOtp) {
-            return res.status(400).json({ message: "Invalid or Expired OTP!" });
-        }
+    // 1️⃣ Check Worker OTP verification
+    const verifiedOtp = await WorkerOtp.findOne({
+      phone,
+      verified: true
+    });
 
-        // 2. Check if worker already exists
-        const workerExists = await Worker.findOne({ phone });
-        if (workerExists) {
-            return res.status(400).json({ message: "Worker already registered with this phone number" });
-        }
-
-        // 3. Create Worker with GeoJSON Location
-        const worker = await Worker.create({
-            name,
-            phone,
-            category,
-            dailyWage,
-            location: {
-                type: 'Point',
-                // MongoDB mein format [Longitude, Latitude] hota hai
-                coordinates: [parseFloat(longitude), parseFloat(latitude)], 
-                address: address
-            },
-            addedBy: req.user._id
-        });
-
-        // 4. Cleanup: Delete OTP after success
-        await Otp.deleteMany({ phone });
-
-        res.status(201).json({
-            success: true,
-            message: "Worker verified & added successfully!",
-            worker
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!verifiedOtp) {
+      return res.status(400).json({
+        message: "Worker phone number not verified"
+      });
     }
+
+    // 2️⃣ Check if worker already exists
+    const workerExists = await Worker.findOne({ phone });
+    if (workerExists) {
+      return res.status(400).json({
+        message: "Worker already registered with this phone number"
+      });
+    }
+
+    // 3️⃣ Create Worker
+    const worker = await Worker.create({
+      name,
+      phone,
+      category,
+      dailyWage,
+      location: {
+        type: 'Point',
+        coordinates: [
+          parseFloat(longitude),
+          parseFloat(latitude)
+        ],
+        address
+      },
+      addedBy: req.user._id
+    });
+
+    // 4️⃣ Cleanup worker OTP
+    await WorkerOtp.deleteMany({ phone });
+
+    res.status(201).json({
+      success: true,
+      message: "Worker added successfully",
+      worker
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // @desc    Get all workers added by the logged-in agent

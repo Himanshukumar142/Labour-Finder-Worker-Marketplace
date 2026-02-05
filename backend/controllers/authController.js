@@ -1,56 +1,66 @@
 const User = require("../models/CreatorModel");
+const Otp = require("../models/OtpModel");
+const bcrypt = require("bcrypt"); // ✅ use bcrypt
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
-exports.register = async (req, res) => {
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey123";
+
+// 1️⃣ Send OTP
+exports.sendOtp = async (req, res) => {
+  const { phone } = req.body;
   try {
-    const { name, phone, password, shopName } = req.body;
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    await Otp.create({ phone, otp: otpCode });
 
-    const userExists = await User.findOne({ phone });
-    if (userExists) {
-      return res.status(400).json({ message: "User already registered with this phone" });
-    }
-
-    const user = await User.create({ name, phone, password, shopName });
-
-    res.status(201).json({
-      success: true,
-      message: "Registration Successful!",
-      userId: user._id,
-    });
-  } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    res.status(500).json({ message: error.message });
+    console.log(`OTP for ${phone}: ${otpCode}`); // For testing
+    res.json({ msg: "OTP sent successfully" });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
   }
 };
 
-exports.login = async (req, res) => {
+// 2️⃣ Verify OTP & Register
+exports.verifyOtpAndRegister = async (req, res) => {
+  const { name, phone, password, role, otp, shopName } = req.body;
   try {
-    const { phone, password } = req.body;
+    const otpRecord = await Otp.findOne({ phone, otp });
+    if (!otpRecord) return res.status(400).json({ msg: "Invalid OTP or expired" });
 
+    const existingUser = await User.findOne({ phone });
+    if (existingUser) return res.status(400).json({ msg: "Phone already registered" });
+
+    const user = new User({
+      name,
+      phone,
+      password,
+      role,
+      shopName,
+      isVerified: true
+    });
+
+    await user.save(); // Pre-save hook hashes password
+
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
+    res.status(201).json({ msg: "Registered successfully", token, user });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+// 3️⃣ Login
+exports.login = async (req, res) => {
+  const { phone, password } = req.body;
+  try {
     const user = await User.findOne({ phone }).select("+password");
-    if (!user) {
-      return res.status(401).json({ message: "Invalid phone or password" });
-    }
+    if (!user) return res.status(400).json({ msg: "User not found" });
+    if (!user.isVerified) return res.status(400).json({ msg: "User not verified" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid phone or password" });
-    }
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.json({
-      success: true,
-      token,
-      user: { id: user._id, name: user.name, role: user.role },
-    });
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    res.status(500).json({ message: error.message });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
+    res.json({ msg: "Login successful", token, user });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
   }
 };

@@ -4,7 +4,7 @@ const workerSchema = new mongoose.Schema({
     name: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     category: { 
-    type: String, 
+    type: [String], 
     required: [true, 'Please specify the work category'], 
     enum: [
         'Plumber', 
