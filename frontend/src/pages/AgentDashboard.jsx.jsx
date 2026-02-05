@@ -39,7 +39,7 @@ const AgentDashboard = () => {
       navigate("/login");
     } else {
       // Fetch workers list - comment out if backend endpoint not ready
-      // fetchWorkers();
+      fetchWorkers();
     }
   }, [navigate]);
 
@@ -51,7 +51,8 @@ const AgentDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Ensure workers is always an array
-      setWorkers(Array.isArray(response.data) ? response.data : []);
+      // Backend returns { success: true, workers: [...] }
+      setWorkers(Array.isArray(response.data.workers) ? response.data.workers : []);
     } catch (err) {
       console.error("Failed to fetch workers:", err);
       // Set empty array on error
@@ -211,10 +212,10 @@ const AgentDashboard = () => {
       setOtp("");
       setOtpSent(false);
       setOtpVerified(false);
-      
+
       // Refresh workers list - uncomment when backend endpoint is ready
-      // fetchWorkers();
-      
+      fetchWorkers();
+
       setTimeout(() => {
         setShowForm(false);
         setMessage({ type: "", text: "" });
@@ -233,7 +234,7 @@ const AgentDashboard = () => {
   // Filter workers - with safety check
   const filteredWorkers = Array.isArray(workers) ? workers.filter(worker => {
     const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         worker.phone?.includes(searchQuery);
+      worker.phone?.includes(searchQuery);
     const matchesCategory = filterCategory === "All" || worker.category?.includes(filterCategory);
     return matchesSearch && matchesCategory;
   }) : [];
@@ -242,7 +243,7 @@ const AgentDashboard = () => {
   const stats = {
     total: Array.isArray(workers) ? workers.length : 0,
     categories: Array.isArray(workers) ? [...new Set(workers.flatMap(w => w.category || []))].length : 0,
-    avgWage: Array.isArray(workers) && workers.length > 0 
+    avgWage: Array.isArray(workers) && workers.length > 0
       ? (workers.reduce((sum, w) => sum + (w.dailyWage || 0), 0) / workers.length).toFixed(0)
       : 0
   };
@@ -288,7 +289,7 @@ const AgentDashboard = () => {
                 Welcome back, Agent!
               </p>
             </div>
-            
+
             {!showForm && (
               <button
                 onClick={() => setShowForm(true)}
@@ -353,7 +354,7 @@ const AgentDashboard = () => {
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Registered Workers</h3>
-              
+
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -369,7 +370,7 @@ const AgentDashboard = () => {
                     </svg>
                   </div>
                 </div>
-                
+
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
@@ -406,7 +407,7 @@ const AgentDashboard = () => {
                           Active
                         </span>
                       </div>
-                      
+
                       <h4 className="font-bold text-gray-900 text-lg mb-1">{worker.name}</h4>
                       <p className="text-gray-600 text-sm mb-3 flex items-center">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,7 +415,7 @@ const AgentDashboard = () => {
                         </svg>
                         {worker.phone}
                       </p>
-                      
+
                       <div className="flex flex-wrap gap-1.5 mb-3">
                         {worker.category?.slice(0, 2).map((cat, i) => (
                           <span key={i} className="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-lg border border-blue-200">
@@ -427,7 +428,7 @@ const AgentDashboard = () => {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="pt-3 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600 text-sm">Daily Wage</span>
@@ -459,11 +460,10 @@ const AgentDashboard = () => {
 
             <div className="p-8">
               {message.text && (
-                <div className={`mb-6 p-4 rounded-xl border-l-4 ${
-                  message.type === "success" 
-                    ? "bg-green-50 border-green-500 text-green-800" 
-                    : "bg-red-50 border-red-500 text-red-800"
-                }`}>
+                <div className={`mb-6 p-4 rounded-xl border-l-4 ${message.type === "success"
+                  ? "bg-green-50 border-green-500 text-green-800"
+                  : "bg-red-50 border-red-500 text-red-800"
+                  }`}>
                   <div className="flex items-center">
                     {message.type === "success" ? (
                       <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -512,7 +512,7 @@ const AgentDashboard = () => {
                     placeholder="10-digit mobile number"
                     disabled={otpVerified}
                   />
-                  
+
                   {!otpSent && !otpVerified && (
                     <button
                       type="button"
@@ -563,11 +563,10 @@ const AgentDashboard = () => {
                     {categories.map(category => (
                       <label
                         key={category}
-                        className={`flex items-center space-x-2 p-3 rounded-lg cursor-pointer transition-all ${
-                          formData.category.includes(category)
-                            ? "bg-blue-100 border-2 border-blue-500"
-                            : "bg-white border-2 border-gray-200 hover:border-blue-300"
-                        }`}
+                        className={`flex items-center space-x-2 p-3 rounded-lg cursor-pointer transition-all ${formData.category.includes(category)
+                          ? "bg-blue-100 border-2 border-blue-500"
+                          : "bg-white border-2 border-gray-200 hover:border-blue-300"
+                          }`}
                       >
                         <input
                           type="checkbox"
