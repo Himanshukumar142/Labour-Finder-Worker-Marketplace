@@ -4,11 +4,14 @@ import Register from "./pages/RegisterAgent";
 import AgentDashboard from "./pages/AgentDashboard.jsx";
 import UserDashboard from "./pages/UserDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import WorkerSearch from "./pages/SearchWorkers.jsx";
+import HowItWorks from "./pages/how-its-work.jsx"
+import LandingPage from './pages/LandingPage.jsx';
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -32,7 +35,8 @@ function App() {
         </ProtectedRoute>
       }
     />
-
+     <Route path="/search" element={<WorkerSearch />} />
+     <Route path="/how-it-works" element={<HowItWorks />} />
       </Routes>
     </BrowserRouter>
   );

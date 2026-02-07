@@ -159,39 +159,46 @@ exports.updateWorker = async (req, res) => {
 // @route   POST /api/workers/nearby
 // @access  Public
 exports.getNearbyWorkers = async (req, res) => {
-    try {
-        const { latitude, longitude, category } = req.body;
+  try {
+    const { latitude, longitude, category } = req.body;
 
-        if (!latitude || !longitude) {
-            return res.status(400).json({ message: "Latitude and Longitude are required" });
-        }
-
-        let query = {
-            location: {
-                $near: {
-                    $geometry: {
-                        type: "Point",
-                        coordinates: [parseFloat(longitude), parseFloat(latitude)]
-                    },
-                    $maxDistance: 5000 // 5km Radius
-                }
-            }
-        };
-
-        // Filter by category if provided
-        if (category) {
-            query.category = category;
-        }
-
-        const workers = await Worker.find(query);
-
-        res.status(200).json({ 
-            success: true, 
-            count: workers.length, 
-            workers 
-        });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        message: "Latitude and Longitude are required"
+      });
     }
+
+    const pipeline = [
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [
+              parseFloat(longitude),
+              parseFloat(latitude)
+            ]
+          },
+          distanceField: "distance",
+          spherical: true,
+          distanceMultiplier: 0.001,
+          maxDistance: 5000
+        }
+      }
+    ];
+
+    if (category) {
+      pipeline.push({ $match: { category } });
+    }
+
+    const workers = await Worker.aggregate(pipeline);
+
+    res.status(200).json({
+      success: true,
+      count: workers.length,
+      workers
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
