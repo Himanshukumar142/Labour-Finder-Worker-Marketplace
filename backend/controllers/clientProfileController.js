@@ -21,11 +21,11 @@ const getClientProfile = async (req, res) => {
 // --- 2. CREATE OR UPDATE PROFILE ---
 const createOrUpdateClientProfile = async (req, res) => {
   try {
-    const { 
-      companyName, 
-      companyWebsite, 
-      companyDescription, 
-      location, 
+    const {
+      companyName,
+      companyWebsite,
+      companyDescription,
+      location,
       socialLinks // Object: { linkedin, twitter }
     } = req.body;
 
