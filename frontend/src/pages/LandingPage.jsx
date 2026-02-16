@@ -54,7 +54,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-             <Link to="/login" className="hidden md:block font-semibold text-slate-600 hover:text-slate-900">Log In</Link>
+             <Link to="/login_professional" className="hidden md:block font-semibold text-slate-600 hover:text-slate-900">Log In</Link>
              <Link 
                to="/post-job" 
                className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full font-bold transition-all shadow-lg shadow-slate-900/20 hover:-translate-y-0.5"
@@ -96,7 +96,7 @@ export default function LandingPage() {
             Search Workers
           </Link>
           <Link 
-            to="/freelancers" 
+            to="/login" 
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-4 rounded-2xl font-bold text-lg shadow-sm transition-all hover:border-slate-300"
           >
             <UserPlus className="w-5 h-5" />

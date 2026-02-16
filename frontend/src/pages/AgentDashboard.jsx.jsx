@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 
 const AgentDashboard = () => {
   const navigate = useNavigate();
@@ -46,10 +46,8 @@ const AgentDashboard = () => {
   const fetchWorkers = async () => {
     try {
       setWorkersLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/agent/workers", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      setWorkersLoading(true);
+      const response = await api.get("/agent/workers");
       // Ensure workers is always an array
       // Backend returns { success: true, workers: [...] }
       setWorkers(Array.isArray(response.data.workers) ? response.data.workers : []);
@@ -128,10 +126,9 @@ const AgentDashboard = () => {
         return;
       }
 
-      await axios.post(
-        "http://localhost:5000/api/workers/otp/send",
-        { phone: formData.phone },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.post(
+        "/workers/otp/send",
+        { phone: formData.phone }
       );
 
       setOtpSent(true);
@@ -146,10 +143,9 @@ const AgentDashboard = () => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post(
-        "http://localhost:5000/api/workers/otp/verify",
-        { phone: formData.phone, otp },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.post(
+        "/workers/otp/verify",
+        { phone: formData.phone, otp }
       );
 
       setOtpVerified(true);
@@ -189,14 +185,9 @@ const AgentDashboard = () => {
         address: formData.address
       };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/agent/workers",
-        workerData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const response = await api.post(
+        "/agent/workers",
+        workerData
       );
 
       setMessage({ type: "success", text: "Worker registered successfully!" });

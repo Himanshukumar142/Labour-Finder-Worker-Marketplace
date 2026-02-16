@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 // --- ICONS (Clean Stroke Style) ---
 const MapPin = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
 );
 const SearchIcon = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
 );
 const Phone = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
 );
 const Star = ({ className, fill }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={fill ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={fill ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
 );
 const Briefcase = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
 );
 
 // --- COMPONENTS ---
@@ -92,7 +92,7 @@ export default function WorkerHubLight() {
 
     try {
       // --- REAL API CALL ---
-      const res = await axios.post("http://localhost:5000/api/workers/nearby", {
+      const res = await api.post("/workers/nearby", {
         latitude: coords.lat,
         longitude: coords.lng,
         category,
@@ -108,7 +108,7 @@ export default function WorkerHubLight() {
 
   const getDistance = (lat1, lng1, lat2, lng2) => {
     if (!lat1 || !lat2) return "N/A";
-    const R = 6371; 
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lng2 - lng1) * Math.PI) / 180;
     const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
@@ -132,19 +132,19 @@ export default function WorkerHubLight() {
                 Worker<span className="text-blue-600">Hub</span>
               </h1>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-6">
               <a href="/how-it-works" className="text-lg font-medium text-slate-500 hover:text-blue-600 transition-colors">How it Works</a>
-              <a href="#" className="text-lg font-medium text-slate-500 hover:text-blue-600 transition-colors">Freelancers</a>
+              <a href="/freelancers" className="text-lg font-medium text-slate-500 hover:text-blue-600 transition-colors">Freelancers</a>
               <a href="#" className="text-lg font-medium text-slate-500 hover:text-blue-600 transition-colors">Find a Job</a>
-              
+
             </div>
           </div>
         </div>
       </header>
 
       <main className="relative z-10 pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        
+
         {/* HERO */}
         <div className="text-center mb-16 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 text-xs font-semibold mb-8">
@@ -168,22 +168,21 @@ export default function WorkerHubLight() {
         {/* SEARCH BAR CARD */}
         <div className="max-w-4xl mx-auto relative group z-20 mb-20">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-          
+
           <div className="relative bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl p-3 shadow-2xl shadow-slate-200/50 flex flex-col md:flex-row gap-3">
-            
+
             {/* Location Button */}
             <button
               onClick={getLocation}
               disabled={locationLoading}
-              className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-2xl transition-all duration-300 text-left group/btn ${
-                coords.lat 
-                  ? "bg-green-50 text-green-700 border border-green-100" 
+              className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-2xl transition-all duration-300 text-left group/btn ${coords.lat
+                  ? "bg-green-50 text-green-700 border border-green-100"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               <div className={`p-2.5 rounded-xl transition-colors ${coords.lat ? "bg-green-100 text-green-600" : "bg-white text-slate-400 group-hover/btn:text-blue-500 shadow-sm"}`}>
                 {locationLoading ? (
-                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
                 ) : (
                   <MapPin className="w-5 h-5" />
                 )}
@@ -235,11 +234,11 @@ export default function WorkerHubLight() {
               )}
             </button>
           </div>
-          
+
           {error && (
             <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 animate-shake shadow-lg shadow-red-500/5">
-               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-               <p className="text-red-600 text-sm font-semibold">{error}</p>
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <p className="text-red-600 text-sm font-semibold">{error}</p>
             </div>
           )}
         </div>
@@ -258,7 +257,7 @@ export default function WorkerHubLight() {
                   <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold border border-slate-200">{workers.length}</span>
                 </h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {workers.map((w, index) => (
                   <div
@@ -275,22 +274,22 @@ export default function WorkerHubLight() {
                         <div>
                           <h4 className="text-lg font-bold text-slate-900 leading-tight">{w.name}</h4>
                           <div className="flex items-center gap-1 text-slate-500 text-sm mt-1">
-                             {/* Assuming API returns rating/jobs, if not, use placeholder logic or conditional rendering */}
-                             {w.rating ? (
-                                <>
-                                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" fill={true} />
-                                  <span className="font-bold text-slate-700">{w.rating}</span>
-                                  <span className="text-slate-400 text-xs">({w.jobs || 0} jobs)</span>
-                                </>
-                             ) : (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-medium">New Joiner</span>
-                             )}
+                            {/* Assuming API returns rating/jobs, if not, use placeholder logic or conditional rendering */}
+                            {w.rating ? (
+                              <>
+                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" fill={true} />
+                                <span className="font-bold text-slate-700">{w.rating}</span>
+                                <span className="text-slate-400 text-xs">({w.jobs || 0} jobs)</span>
+                              </>
+                            ) : (
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-medium">New Joiner</span>
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                         <div className="text-xs text-slate-400 font-medium uppercase tracking-wide">Daily Rate</div>
-                         <div className="text-xl font-bold text-slate-900">₹{w.dailyWage}</div>
+                        <div className="text-xs text-slate-400 font-medium uppercase tracking-wide">Daily Rate</div>
+                        <div className="text-xl font-bold text-slate-900">₹{w.dailyWage}</div>
                       </div>
                     </div>
 
@@ -309,7 +308,7 @@ export default function WorkerHubLight() {
                       <span className="truncate flex-1 font-medium">{w.location.address}</span>
                       {coords.lat && (
                         <span className="bg-white px-2 py-1 rounded-lg text-blue-600 font-bold text-xs shadow-sm border border-slate-100 whitespace-nowrap">
-                           {getDistance(coords.lat, coords.lng, w.location.coordinates[1], w.location.coordinates[0])} km
+                          {getDistance(coords.lat, coords.lng, w.location.coordinates[1], w.location.coordinates[0])} km
                         </span>
                       )}
                     </div>
@@ -328,7 +327,7 @@ export default function WorkerHubLight() {
                         rel="noreferrer"
                         className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg shadow-green-200 transition-all hover:-translate-y-0.5"
                       >
-                         WhatsApp
+                        WhatsApp
                       </a>
                     </div>
                   </div>
@@ -339,7 +338,7 @@ export default function WorkerHubLight() {
             !loading && (
               <div className="text-center py-20">
                 <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <SearchIcon className="w-10 h-10 text-slate-300" />
+                  <SearchIcon className="w-10 h-10 text-slate-300" />
                 </div>
                 <h3 className="text-slate-900 font-bold text-lg">Ready to search</h3>
                 <p className="text-slate-500 max-w-sm mx-auto mt-2">Set your location and choose a category to find workers near you.</p>

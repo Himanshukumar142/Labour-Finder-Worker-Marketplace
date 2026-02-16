@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -24,8 +24,8 @@ const Register = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/send-otp",
+      const res = await api.post(
+        "/auth/send-otp",
         { phone: form.phone }
       );
 
@@ -45,8 +45,8 @@ const Register = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/verify-otp-register",
+      const res = await api.post(
+        "/auth/verify-otp-register",
         {
           name: form.name,
           phone: form.phone,
